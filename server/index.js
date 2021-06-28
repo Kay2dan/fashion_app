@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
 const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
@@ -22,57 +23,70 @@ const csvWriter = createCSVWriter({
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto(`${url}1`);
-
-    // get total page count
-    const ttlPages = await page.evaluate(() => {
-      const ele = document.querySelector(
-        "ul.pages-items > li.current > strong.page > span"
-      ).innerHTML;
-      return ele.split("Of")[1].trim();
+    page.on("response", async response => {
+      const url = response.url();
+      if (response.request().resourceType() === "image") {
+        response.buffer().then(file => {
+          const fileName = url.split("/").pop();
+          const filePath = path.resolve(__dirname, fileName);
+          const writeStream = fs.createWriteStream(filePath);
+          writeStream.write(file);
+        });
+      }
     });
 
-    console.log("c : ", ttlPages);
+    await page.goto(`${url}1`);
 
-    const collection = [];
+    // // get total page count
+    // const ttlPages = await page.evaluate(() => {
+    //   const ele = document.querySelector(
+    //     "ul.pages-items > li.current > strong.page > span"
+    //   ).innerHTML;
+    //   return ele.split("Of")[1].trim();
+    // });
 
-    // loop starting from page 1 to last page
-    for (let i = 1; i <= 5; i++) {
-      i > 1 ? await page.goto(`${url}${i}`) : false;
+    // console.log("c : ", ttlPages);
 
-      const urls = await page.evaluate(() => {
-        let results = [];
-        let items = document.querySelectorAll("a.product-item-photo");
-        items.forEach(item => {
-          results.push({
-            url: item.getAttribute("href"),
-          });
-        });
-        return results;
-      });
+    // const collection = [];
 
-      collection.push(urls);
+    // // loop starting from page 1 to last page
+    // for (let i = 1; i <= 5; i++) {
+    //   // already on page 1, so no need to goto the page
+    //   i > 1 ? await page.goto(`${url}${i}`) : false;
 
-      //  const payload = [];
-      //   for (const o of urls) {
-      //     const page = await browser.newPage();
-      //     await page.goto(o.url);
-      //     let linkInfo = await page.evaluate(() => ({
-      //       img: document
-      //         .querySelector("div.all-img > a > img")
-      //         .getAttribute("src"),
-      //       title: document.querySelector("h1.page-title > span").innerHTML,
-      //       price: document.querySelector(
-      //         "div.product-info-price > span > span > span.price"
-      //       ).innerHTML,
-      //     }));
-      //     payload.push(linkInfo);
-      //     page.close();
-      //   }
-      //   console.log("payload:", payload);
-    }
+    //   const urls = await page.evaluate(() => {
+    //     let results = [];
+    //     let items = document.querySelectorAll("a.product-item-photo");
+    //     items.forEach(item => {
+    //       results.push({
+    //         url: item.getAttribute("href"),
+    //       });
+    //     });
+    //     return results;
+    //   });
 
-    console.log("collection : ", collection);
+    //   collection.push(urls);
+
+    //  const payload = [];
+    //   for (const o of urls) {
+    //     const page = await browser.newPage();
+    //     await page.goto(o.url);
+    //     let linkInfo = await page.evaluate(() => ({
+    //       img: document
+    //         .querySelector("div.all-img > a > img")
+    //         .getAttribute("src"),
+    //       title: document.querySelector("h1.page-title > span").innerHTML,
+    //       price: document.querySelector(
+    //         "div.product-info-price > span > span > span.price"
+    //       ).innerHTML,
+    //     }));
+    //     payload.push(linkInfo);
+    //     page.close();
+    //   }
+    //   console.log("payload:", payload);
+    // }
+
+    // console.log("collection : ", collection);
 
     await browser.close();
 
