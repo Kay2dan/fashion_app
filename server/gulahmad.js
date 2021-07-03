@@ -5,11 +5,15 @@ const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const createCSVWriter = require("csv-writer").createObjectCsvWriter;
 
-const site = "https://www.gulahmedshop.com/eid-shopping-2021/women?p=";
+const stitchedSite = "https://www.gulahmedshop.com/eid-shopping-2021/women?p=";
+const unStitchedSite =
+  "https://www.gulahmedshop.com/eid-shopping-2021/unstitched?p=";
+const imgDLPath = "./data/img/gulahmad/gulahmad_women_unstitched/";
+const csvDLPath = "./data/gulahmad_women_unstitched.csv";
 
 //csv file setup
 const csvWriter = createCSVWriter({
-  path: "data/generation.csv",
+  path: csvDLPath,
   header: [
     { id: "img", title: "IMG" },
     { id: "title", title: "TITLE" },
@@ -31,7 +35,7 @@ const fetchHtml = async url => {
 
 //Node.js Function to save image from External URL.
 function saveImageToDisk(url, name, localPath) {
-  request(url).pipe(fs.createWriteStream(`./data/img/gulahmad/${name}.png`));
+  request(url).pipe(fs.createWriteStream(`${imgDLPath}${name}.png`));
   // var fullUrl = url;
   // var file = fs.createWriteStream(localPath);
   // var request = https.get(url, function (response) {
@@ -56,7 +60,7 @@ function saveImageToDisk(url, name, localPath) {
     //   }
     // });
 
-    await page.goto(`${site}1`, {
+    await page.goto(`${unStitchedSite}1`, {
       waitUntil: "domcontentloaded",
     });
 
@@ -73,7 +77,7 @@ function saveImageToDisk(url, name, localPath) {
     // get product links from all the paginated pages
     for (let i = 1; i <= ttlPages; i++) {
       // already on page 1, so no need to goto the page
-      i > 1 ? await page.goto(`${site}${i}`) : false;
+      i > 1 ? await page.goto(`${unStitchedSite}${i}`) : false;
 
       const urls = await page.evaluate(() => {
         let products = [];
@@ -102,9 +106,12 @@ function saveImageToDisk(url, name, localPath) {
         linkInfo = {
           img: $("a.MagicZoom").attr("href"),
           title: $("div.product-info-main > div > h1.page-title > span").text(),
+          // price: $(
+          //   "div.product-info-price div.price-box span.special-price span.price-container span:last-child"
+          // ).text(), // for women stiched
           price: $(
-            "div.product-info-price div.price-box span.special-price span.price-container span:last-child"
-          ).text(),
+            "div.product-info-price div.price-box span.price-container span.price-wrapper span.price"
+          ).text(), // for women unstitched
         };
 
         try {
