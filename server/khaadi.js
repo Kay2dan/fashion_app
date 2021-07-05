@@ -6,7 +6,7 @@ const puppeteer = require("puppeteer");
 const createCSVWriter = require("csv-writer").createObjectCsvWriter;
 
 const stitchedSite = "https://pk.khaadi.com/ready-to-wear.html";
-const stitchedImgDLPath = "./data/img/khaadi/stitched";
+const stitchedImgDLPath = "./data/img/khaadi/stitched/";
 const stitchedCsvDLPath = "./data/khaadi_women_stitched.csv";
 
 // const unStitchedSite = "https://pk.khaadi.com/unstitched.html";
@@ -37,7 +37,7 @@ const fetchHtml = async url => {
 
 //Node.js Function to save image from External URL.
 function saveImageToDisk(url, name, localPath) {
-  request(url).pipe(fs.createWriteStream(`${imgDLPath}${name}.png`));
+  request(url).pipe(fs.createWriteStream(`${stitchedImgDLPath}${name}.png`));
   // var fullUrl = url;
   // var file = fs.createWriteStream(localPath);
   // var request = https.get(url, function (response) {
@@ -98,7 +98,7 @@ async function scrapeInfiniteScrollItems(
  */
 (async () => {
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     await page.goto(`${stitchedSite}`, {
@@ -117,38 +117,87 @@ async function scrapeInfiniteScrollItems(
       return collection;
     });
 
+    // for (let k = 0; k < 1; k++) {
+    //   const url = urls[k];
+    //   const html = await fetchHtml(url);
+    //   console.log("html: ", html);
+    //   if (!html) {
+    //     continue;
+    //   } else {
+    //     const $ = cheerio.load(html);
+    //     console.log("$$$$$$$$$$$$$$$$$$$$$", $("div.fotorama__stage"));
+    //     let linkInfo = {
+    //       img: $(
+    //         "div.fotorama__stage div.fotorama__stage__shaft div.fotorama__stage__frame img.fotorama__img"
+    //       ).attr("src"),
+    //       title: $("div.product-info-main div.product div.value").text(),
+    //       price: $(
+    //         "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
+    //       ).text(),
+    //     };
+
+    //     try {
+    //       await saveImageToDisk(linkInfo.img, linkInfo.title);
+    //     } catch (err) {
+    //       console.log("err: ", err);
+    //     }
+    //     console.log("linkinfo: ", linkInfo);
+    //     payload.push(linkInfo);
+    //     // await page.close();
+    //   }
+    // }
     const payload = [];
-
     for (let k = 0; k < urls.length; k++) {
-      const url = urls[k];
-      const html = await fetchHtml(url);
-      console.log("html: ", html);
-      if (!html) {
-        continue;
-      } else {
-        const $ = cheerio.load(html);
-        console.log("$");
-        let linkInfo = {
-          img: $(
-            "div.fotorama__stage div.fotorama__stage__shaft div.fotorama__stage__frame img.fotorama__img"
-          ).attr("src"),
-          title: $("div.product-info-main div.product div.value").text(),
-          price: $(
-            "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
-          ).text(),
-          // price: $(
-          //   "div.product-info-price div.price-box span.price-container span.price-wrapper span.price"
-          // ).text(), // for women unstitched
+      try {
+        const url = urls[k];
+        const page = await browser.newPage();
+        await page.goto(url);
+        await page.waitFor(5000);
+        const linkInfo = {
+          img: await page.evaluate(() => {
+            return document
+              .querySelector("img.fotorama__img")
+              .getAttribute("src");
+          }),
+          title: await page.evaluate(() => {
+            return document.querySelector(
+              "div.product-info-main div.product div.value"
+            ).innerHTML;
+          }),
+          price: await page.evaluate(() => {
+            return document.querySelector(
+              "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
+            ).innerHTML;
+          }),
         };
+        console.log("linkInfo", linkInfo);
+        // const img = await page.evaluate(() => {
+        //   return document.querySelector("img.fotorama__img").getAttribute("src");
+        // });
+        // console.log("ele", img);
+        // const title = await page.evaluate(() => {
+        //   return document.querySelector(
+        //     "div.product-info-main div.product div.value"
+        //   ).innerHTML;
+        // });
+        // console.log("title: ", title);
+        // const price = await page.evaluate(() => {
+        //   return document.querySelector(
+        //     "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
+        //   ).innerHTML;
+        // });
+        // console.log("price: ", price);
 
-        // try {
-        //   await saveImageToDisk(linkInfo.img, linkInfo.title);
-        // } catch (err) {
-        //   console.log("err: ", err);
-        // }
+        try {
+          await saveImageToDisk(linkInfo.img, linkInfo.title);
+        } catch (err) {
+          console.log("err: ", err);
+        }
         // console.log("linkinfo: ", linkInfo);
         payload.push(linkInfo);
-        // await page.close();
+        await page.close();
+      } catch (err) {
+        console.log("error within loop", err);
       }
     }
 
