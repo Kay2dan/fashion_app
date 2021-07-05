@@ -5,17 +5,22 @@ const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const createCSVWriter = require("csv-writer").createObjectCsvWriter;
 
-const stitchedSite = "https://pk.khaadi.com/ready-to-wear.html";
-const stitchedImgDLPath = "./data/img/khaadi/stitched/";
-const stitchedCsvDLPath = "./data/khaadi_women_stitched.csv";
+// const stitchedSite = "https://pk.khaadi.com/ready-to-wear.html";
+// const stitchedImgDLPath = "./data/img/khaadi/stitched/";
+// const stitchedCsvDLPath = "./data/khaadi_women_stitched.csv";
 
-// const unStitchedSite = "https://pk.khaadi.com/unstitched.html";
-// const unStitchedImgDLPath = "./data/img/khaadi/unstitched";
-// const unStitchedCsvDLPath = "./data/khaadi_women_unstitched.csv";
+const unStitchedSite = "https://pk.khaadi.com/unstitched.html";
+const unStitchedImgDLPath = "./data/img/khaadi/unstitched/";
+const unStitchedCsvDLPath = "./data/khaadi_women_unstitched.csv";
+
+const currentSite = unStitchedSite;
+const currentDLPath = unStitchedImgDLPath;
+const currentCSVPath = unStitchedCsvDLPath;
+const imgFormat = "webp";
 
 //csv file setup
 const csvWriter = createCSVWriter({
-  path: stitchedCsvDLPath,
+  path: currentCSVPath,
   header: [
     { id: "img", title: "IMG" },
     { id: "title", title: "TITLE" },
@@ -37,7 +42,9 @@ const fetchHtml = async url => {
 
 //Node.js Function to save image from External URL.
 function saveImageToDisk(url, name, localPath) {
-  request(url).pipe(fs.createWriteStream(`${stitchedImgDLPath}${name}.png`));
+  request(url).pipe(
+    fs.createWriteStream(`${currentDLPath}${name}.${imgFormat}`)
+  );
   // var fullUrl = url;
   // var file = fs.createWriteStream(localPath);
   // var request = https.get(url, function (response) {
@@ -101,7 +108,7 @@ async function scrapeInfiniteScrollItems(
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto(`${stitchedSite}`, {
+    await page.goto(`${currentSite}`, {
       waitUntil: "domcontentloaded",
     });
 
@@ -153,17 +160,18 @@ async function scrapeInfiniteScrollItems(
         const page = await browser.newPage();
         await page.goto(url);
         await page.waitFor(5000);
+        const title = await page.evaluate(() => {
+          return document.querySelector(
+            "div.product-info-main div.product div.value"
+          ).innerHTML;
+        });
         const linkInfo = {
           img: await page.evaluate(() => {
             return document
               .querySelector("img.fotorama__img")
               .getAttribute("src");
           }),
-          title: await page.evaluate(() => {
-            return document.querySelector(
-              "div.product-info-main div.product div.value"
-            ).innerHTML;
-          }),
+          title: `${title}${k}`,
           price: await page.evaluate(() => {
             return document.querySelector(
               "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
