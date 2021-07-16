@@ -37,15 +37,20 @@ import Home from "./screens/Home";
 //   );
 // }
 
-const Stack = createStackNavigator();
+const { Navigator, Screen } = createStackNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Settings" component={Settings} />
-      </Stack.Navigator>
+      <Navigator initialRouteName="Home" screenOptions={{
+        headerStyle: {
+          backgroundColor: "pink",
+        },
+        headerTintColor: "#555",
+      }}>
+        <Screen name="Home" component={Home} options={{ title: "Rate Designs" }} />
+        <Screen name="Settings" component={Settings} options={{ title: "Settings" }} />
+      </Navigator>
     </NavigationContainer>
   );
 }
