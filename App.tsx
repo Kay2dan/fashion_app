@@ -26,8 +26,10 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { SafeAreaView } from "react-native"
 import Settings from "./screens/Settings";
 import Home from "./screens/Home";
+import RateDesign from "./screens/RateDesign";
 
 // function HomeScreen() {
 //   return (
@@ -41,17 +43,20 @@ const { Navigator, Screen } = createStackNavigator();
 
 function App() {
   return (
-    <NavigationContainer>
-      <Navigator initialRouteName="Home" screenOptions={{
-        headerStyle: {
-          backgroundColor: "pink",
-        },
-        headerTintColor: "#555",
-      }}>
-        <Screen name="Home" component={Home} options={{ title: "Rate Designs" }} />
-        <Screen name="Settings" component={Settings} options={{ title: "Settings" }} />
-      </Navigator>
-    </NavigationContainer>
+    <SafeAreaView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Navigator initialRouteName="Home" screenOptions={{
+          headerStyle: {
+            backgroundColor: "pink",
+          },
+          headerTintColor: "#555",
+        }}>
+          <Screen name="Home" component={Home} options={{ title: "Rate Designs" }} />
+          <Screen name="Settings" component={Settings} options={{ title: "Settings" }} />
+          <Screen name="Rate Design" component={RateDesign} options={{ title: "Rate Design" }} />
+        </Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
   );
 }
 

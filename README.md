@@ -16,6 +16,9 @@
 
   ```
 
+- In bios, we have to enable virtualisation technology.
+- Install KVM by following this guide:
+  https://phoenixnap.com/kb/ubuntu-install-kvm
 - Login again to load the sys-links in `.zshrc`
 - In Studio, follow the setup guide. Follow the guide as per expo documentation
   on installing the android sdk and tools.
