@@ -1,16 +1,18 @@
 import * as React from 'react';
-import { Button, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text, View } from 'react-native';
+import FitImage from 'react-native-fit-image';
 
 const DesignView: React.FC<any> = ({ navigation }) => {
   return (
     <View style={styles.mainView}>
-      <Text style={{ textAlign: 'center' }}>Salam</Text>
-      <View style={styles.imgContainer}>
-        <Image resizeMethod={'auto'} resizeMode={"contain"} source={{ width: 600, height: 250, uri: "https://picsum.photos/seed/picsum/200/300" }} style={styles.img} />
-      </View>
-      <View style={styles.btnsContainer}>
-        <Button title="like" onPress={() => { }} />
-        <Button title="dislike" onPress={() => { }} />
+      <FitImage
+        source={require("./01.png")}
+        style={styles.img}
+      />
+      <View style={styles.abs}>
+        <View style={styles.designInfo}>
+          <Text style={styles.designText} >Style name</Text>
+        </View>
       </View>
     </View>
   );
@@ -18,28 +20,33 @@ const DesignView: React.FC<any> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   mainView: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "yellow",
+    width: "96%",
+    height: "92%",
+    marginLeft: "2%",
+    backgroundColor: "blue",
     borderColor: "black",
     borderWidth: 1,
     borderStyle: "solid"
   },
-  imgContainer: {
-    backgroundColor: "rgba(11,222, 123, 0.25)",
-    width: "92%",
-    height: "80%",
-    marginLeft: "4%"
-  },
   img: {
-    width: "100%",
-    height: "100%"
+    borderRadius: 4,
   },
-  btnsContainer: {
-    flex: 1,
+  abs: {
+    position: "absolute",
+    bottom: 15,
+    marginLeft: 5,
+  },
+  designInfo: {
+    backgroundColor: "hsla(158, 20%, 10%, 0.75)",
+    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "pink"
+    justifyContent: "flex-start",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 3,
+  },
+  designText: {
+    color: "white"
   }
 })
 
