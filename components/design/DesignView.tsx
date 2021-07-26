@@ -6,7 +6,7 @@ const DesignView: React.FC<any> = ({ navigation }) => {
   return (
     <View style={styles.mainView}>
       <FitImage
-        source={require("./01.png")}
+        source={require("../../assets/appIcons/placeholder_design.png")}
         style={styles.img}
       />
       <View style={styles.abs}>
