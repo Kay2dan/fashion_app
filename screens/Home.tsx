@@ -7,6 +7,7 @@ const Home: React.FC<any> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <Button onPress={() => navigation.navigate("Settings")} title="Settings" />
+      <Button onPress={() => navigation.navigate("Rate Design")} title="Rate Design" />
     </View>
   );
 };
