@@ -22,9 +22,15 @@ const imgFormat = "webp";
 const csvWriter = createCSVWriter({
   path: currentCSVPath,
   header: [
+    { id: "color", title: "COLOR" },
+    { id: "design", title: "DESIGN" },
+    { id: "fabric", title: "FABRIC" },
     { id: "img", title: "IMG" },
-    { id: "title", title: "TITLE" },
     { id: "price", title: "PRICE" },
+    { id: "product_type", title: "PRODUCT_TYPE" },
+    { id: "sku", title: "SKU" },
+    { id: "technique", title: "TECHNIQUE" },
+    { id: "title", title: "TITLE" },
   ],
 });
 
@@ -100,9 +106,30 @@ async function scrapeInfiniteScrollItems(
   } catch (e) {}
 }
 
-/***
+// const getImages = async page => {
+//   const imgs = [];
+//   imgs.push(
+//     await page.evaluate(() => {
+//       return document.querySelector("img.fotorama__img").getAttribute("src");
+//     })
+//   );
+//   await page.waitforTimeout(7000);
+//   let ref;
+//   const a = await page.evaluate(async () => {
+//     return document.querySelectorAll(".fotorama__nav__shaft ");
+//     // img2.click();
+//   });
+//   // await page.waitFor(5000);
+//   // const img1 = await page.evaluate(() => {
+//   //   return document.querySelector("img.fotorama__img").getAttribute("src");
+//   // });
+//   // imgs.push(img1);
+//   console.log("imgs", imgs);
+// };
+
+/*********************************************
  * MAIN FUNC
- */
+ ********************************************/
 (async () => {
   try {
     const browser = await puppeteer.launch({ headless: true });
@@ -158,25 +185,78 @@ async function scrapeInfiniteScrollItems(
       try {
         const url = urls[k];
         const page = await browser.newPage();
+        await page.setViewport({
+          width: 1980,
+          height: 1800,
+        });
         await page.goto(url);
-        await page.waitFor(5000);
+        // await page.waitForSelector(".fotorama__nav__frame--thumb");
+        await page.waitForSelector("img.fotorama__img");
         const title = await page.evaluate(() => {
           return document.querySelector(
             "div.product-info-main div.product div.value"
           ).innerHTML;
         });
+        // const imgs = [];
+        // const i = await page.evaluate(() => {
+        //   return document
+        //     .querySelector("img.fotorama__img")
+        //     .getAttribute("src");
+        // });
+        // console.log("i: ", i);
+        // imgs.push(i);
+        // const jsHandle = await page.evaluateHandle(async () => {
+        //   const ele = document.querySelector(
+        //     ".fotorama-item .fotorama__nav-wrap .fotorama__nav__shaft .fotorama__nav__frame--thumb"
+        //   );
+        //   return ele;
+        // });
+        // jsHandle[1].click();
+        // await page.waitForTimeout(3000);
+        // const res = await page.evaluateHandle(el => {
+        //   return document
+        //     .querySelector("img.fotorama__img")
+        //     .getAttribute("src");
+        // }, jsHandle);
+        // console.log("j: ", res);
+
         const linkInfo = {
+          color: await page.evaluate(() => {
+            return document
+              .querySelector("div.swatch-option")
+              .getAttribute("option-label");
+          }),
+          design: await page.evaluate(() => {
+            return document.querySelector("div#Details div:nth-child(4)")
+              .textContent;
+          }),
+          fabric: await page.evaluate(() => {
+            return document.querySelector("div#Details div:nth-child(3)")
+              .textContent;
+          }),
           img: await page.evaluate(() => {
             return document
               .querySelector("img.fotorama__img")
               .getAttribute("src");
           }),
-          title: `${title}${k}`,
           price: await page.evaluate(() => {
             return document.querySelector(
               "div.product-info-main div.price-box span.normal-price span.price-container span.price-wrapper span.price"
             ).innerHTML;
           }),
+          product_type: await page.evaluate(() => {
+            return document.querySelector("div#Details div:nth-child(1)")
+              .textContent;
+          }),
+          sku: await page.evaluate(() => {
+            return document.querySelector("div.product.sku div.value")
+              .innerHTML;
+          }),
+          technique: await page.evaluate(() => {
+            return document.querySelector("div#Details div:nth-child(2)")
+              .textContent;
+          }),
+          title: `${title}${k}`,
         };
         console.log("linkInfo", linkInfo);
         // const img = await page.evaluate(() => {
